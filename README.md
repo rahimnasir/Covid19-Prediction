@@ -14,8 +14,10 @@ This project shows on how to perform prediction for Covid-19 Cases based on prev
 
 ## Data Windowing
 ![data_window](static/data_windowing_three_batch.png)
+
+The data windowing is used to separate the dataset into number of batch based on batch size. This allow the model to learn the trend and pattern from the dataset.
 ## Predicted Output
 ![prediction](static/prediction_three_batch.png)
-
+The first, second and third batch shows the prediction and label plotted to show how far the prediction is from the label
 ### Dataset link
 [Covid-19 Cases in Malaysia](https://github.com/MoH-Malaysia/covid19-public)
