@@ -13,7 +13,7 @@ This project shows on how to perform prediction for Covid-19 Cases based on prev
 3. Expected Outcome: Develop an accurate predictive model that forecasts COVID-19 trends, aiding in decision-making for resource allocation and public health responses.
 
 ## Predicted Output
-![model_score](static/trendline.png)
+![model_score](static/prediction_three_batch.png)
 
 ### Dataset link
 [Covid-19 Cases in Malaysia](https://github.com/MoH-Malaysia/covid19-public)
