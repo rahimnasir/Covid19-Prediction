@@ -1,0 +1,16 @@
+artifact_uri: file:///c:/Users/Abdul%20Rahim/Desktop/Capstone%20Project/capstone_1/mlruns/581382817259276443/9885886d795a477e9913a806b66a7554/artifacts
+deleted_time: 1736511060575
+end_time: 1736510958779
+entry_point_name: ''
+experiment_id: '581382817259276443'
+lifecycle_stage: deleted
+run_id: 9885886d795a477e9913a806b66a7554
+run_name: lstm_32_units
+run_uuid: 9885886d795a477e9913a806b66a7554
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1736510954430
+status: 4
+tags: []
+user_id: Abdul Rahim
