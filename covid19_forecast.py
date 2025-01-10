@@ -39,21 +39,38 @@ row_numbers = train_case_df[train_case_df['cases_new'].isnull()].index
 # feature engineering where number of new cases calculated by subtracting number 
 # of active cases specific day with previous day for train dataset
 for row_num in row_numbers:
-    train_case_df.loc[row_num,'cases_new'] = train_case_df.loc[row_num,'cases_active']-train_case_df.loc[row_num-1,'cases_active']
-
-# Convert train dataset data type into float64
-train_case_df['cases_new'] = train_case_df['cases_new'].astype('float64')
+    train_case_df.loc[row_num,'cases_new'] = (train_case_df.loc[row_num,'cases_active']-train_case_df.loc[row_num-1,'cases_active'])+train_case_df.loc[row_num,'cases_recovered']
 
 # Get index with NaN value in cases_new column from test dataset
 row_index = test_case_df.loc[test_case_df['cases_new'].isnull()].index
 row_index = row_index[0]
 
 # perform both data cleanup and feature engineering same method as train dataset, but for test dataset
-test_case_df.loc[row_index,'cases_new'] = test_case_df.loc[row_index,'cases_active']-test_case_df.loc[row_index-1,'cases_active']
+test_case_df.loc[row_index,'cases_new'] = (test_case_df.loc[row_index,'cases_active']-test_case_df.loc[row_index-1,'cases_active'])+test_case_df.loc[row_index,'cases_recovered']
 
 # Convert data type to float64 for both train and test dataset
 train_case_df = train_case_df.astype('float64')
 test_case_df = test_case_df.astype('float64')
+
+# Show there are no null value and all columns are in float data type
+print("Train Dataset Information\n")
+print(train_case_df.info())
+print("Test Dataset Information\n")
+print(test_case_df.info())
+
+# Create duplicated dataset for train and test
+train_case_df_copy = train_case_df.copy()
+test_case_df_copy = test_case_df.copy()
+train_case_df_copy.index = train_date_time
+test_case_df_copy.index = test_date_time
+
+# Plot the graph for train dataset
+train_case_df_copy.plot(subplots=True,figsize=(10,20))
+plt.show()
+
+# Plot the graph for test dataset
+test_case_df_copy.plot(subplots=True,figsize=(10,20))
+plt.show()
 
 # Get the half number of row from test dataset
 test_rows = len(test_case_df.index)
@@ -63,6 +80,11 @@ split_num = int(test_rows/2)
 train_data = train_case_df
 test_data = test_case_df[:split_num]
 val_data = test_case_df[split_num:]
+
+# Show the shape size for train, test and validation dataset
+print("Train dataset shape:",train_data.shape)
+print("Test dataset shape:",test_data.shape)
+print("Validation dataset shape:",val_data.shape)
 
 # Get the mean and standard deviation of train dataset
 train_mean = train_data.mean()
@@ -78,6 +100,7 @@ chosen_column = 'cases_active'
 
 # Using WindowGenerator function to perform data windowing
 data_window = WindowGenerator(30,30,1,train_df,val_df,test_df,label_columns=[chosen_column])
+data_window.plot(plot_col=chosen_column)
 
 # Setup MLFlow Experiment if not created yet
 mlflow.set_experiment("Covid-19 Prediction")
@@ -114,39 +137,44 @@ model_single_256_units.summary()
 
 model_single_256_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
-# Set the early stopping and the maxinum number of epochs
-early_stopping = keras.callbacks.EarlyStopping(patience=5,verbose=1)
+# Set the maxinum number of epochs
 MAX_EPOCHS = 100
 
 # Run the experiment model for 32 units LSTM
+print("LSTM 32 Units Model")
 with mlflow.start_run(run_name="lstm_32_units") as run:
     mlflow.tensorflow.autolog()
-    history_32 = model_single_32_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS,callbacks=[early_stopping])
+    history_32 = model_single_32_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS)
 
 # Run the experiment model for 64 units LSTM
+print("LSTM 64 Units Model")
 with mlflow.start_run(run_name="lstm_64_units") as run:
     mlflow.tensorflow.autolog()
-    history_64 = model_single_64_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS,callbacks=[early_stopping])
+    history_64 = model_single_64_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS)
 
 # Run the experiment model for 128 units LSTM
+print("LSTM 128 Units Model")
 with mlflow.start_run(run_name="lstm_128_units") as run:
     mlflow.tensorflow.autolog()
-    history_128 = model_single_128_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS,callbacks=[early_stopping])
+    history_128 = model_single_128_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS)
 
 # Run the experiment model for 256 units LSTM
+print("LSTM 256 Units Model")
 with mlflow.start_run(run_name="lstm_256_units") as run:
     mlflow.tensorflow.autolog()
-    history_256 = model_single_256_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS,callbacks=[early_stopping])
+    history_256 = model_single_256_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS)
 
 # Load the best lstm model
-model_load = mlflow.tensorflow.load_model(model_uri=f"models:/best_lstm_model/2")
+model_load = mlflow.tensorflow.load_model(model_uri=f"models:/best_lstm_model/5")
 
 # Show the prediction of the model based on data windowing test dataset
+print("Predicted normalized output from the normalized test dataset")
 predictions = model_load.predict(data_window.test)
 predictions_squeezed = predictions.squeeze(axis=-1)  # Remove the last dimension
 predictions_df = pd.DataFrame(predictions_squeezed)
 print(predictions_df)
 
 # Plot the graph for the best model
+print("Predictions for the first three batches on the best model")
 data_window.plot(plot_col=chosen_column,model=model_load)
 # %%
