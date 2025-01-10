@@ -52,25 +52,27 @@ test_case_df.loc[row_index,'cases_new'] = (test_case_df.loc[row_index,'cases_act
 train_case_df = train_case_df.astype('float64')
 test_case_df = test_case_df.astype('float64')
 
-# Show there are no null value and all columns are in float data type
-print("Train Dataset Information\n")
-print(train_case_df.info())
-print("Test Dataset Information\n")
-print(test_case_df.info())
-
-# Create duplicated dataset for train and test
+# Get the information for displaying the graph of dataset
 train_case_df_copy = train_case_df.copy()
 test_case_df_copy = test_case_df.copy()
 train_case_df_copy.index = train_date_time
 test_case_df_copy.index = test_date_time
 
-# Plot the graph for train dataset
+# Plot the train dataset
+print("Train Dataset Graph")
 train_case_df_copy.plot(subplots=True,figsize=(10,20))
 plt.show()
 
-# Plot the graph for test dataset
+# Plot the test dataset
+print("Test Dataset Graph")
 test_case_df_copy.plot(subplots=True,figsize=(10,20))
 plt.show()
+
+# Show there are no null value and all columns are in float data type
+print("Train Dataset Information\n")
+print(train_case_df.info())
+print("Test Dataset Information\n")
+print(test_case_df.info())
 
 # Get the half number of row from test dataset
 test_rows = len(test_case_df.index)
@@ -100,6 +102,7 @@ chosen_column = 'cases_active'
 
 # Using WindowGenerator function to perform data windowing
 data_window = WindowGenerator(30,30,1,train_df,val_df,test_df,label_columns=[chosen_column])
+print("Three batches graph of data windowing")
 data_window.plot(plot_col=chosen_column)
 
 # Setup MLFlow Experiment if not created yet
@@ -109,7 +112,6 @@ mlflow.set_experiment("Covid-19 Prediction")
 model_single_32_units = keras.Sequential()
 model_single_32_units.add(keras.layers.LSTM(32,return_sequences=True))
 model_single_32_units.add(keras.layers.Dense(1))
-model_single_32_units.summary()
 
 model_single_32_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
@@ -117,7 +119,6 @@ model_single_32_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 model_single_64_units = keras.Sequential()
 model_single_64_units.add(keras.layers.LSTM(64,return_sequences=True))
 model_single_64_units.add(keras.layers.Dense(1))
-model_single_64_units.summary()
 
 model_single_64_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
@@ -125,7 +126,6 @@ model_single_64_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 model_single_128_units = keras.Sequential()
 model_single_128_units.add(keras.layers.LSTM(128,return_sequences=True))
 model_single_128_units.add(keras.layers.Dense(1))
-model_single_128_units.summary()
 
 model_single_128_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
@@ -133,7 +133,6 @@ model_single_128_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 model_single_256_units = keras.Sequential()
 model_single_256_units.add(keras.layers.LSTM(256,return_sequences=True))
 model_single_256_units.add(keras.layers.Dense(1))
-model_single_256_units.summary()
 
 model_single_256_units.compile(optimizer='adam',loss='mse',metrics=['mae'])
 
@@ -164,8 +163,25 @@ with mlflow.start_run(run_name="lstm_256_units") as run:
     mlflow.tensorflow.autolog()
     history_256 = model_single_256_units.fit(data_window.train,validation_data=data_window.val,epochs=MAX_EPOCHS)
 
+# Model architecture of the LSTM 32 Units model
+print("LSTM 32 Units Model Architecture")
+model_single_32_units.summary()
+
+# Model architecture of the LSTM 64 Units model
+print("LSTM 64 Units Model Architecture")
+model_single_64_units.summary()
+
+# Model architecture of the LSTM 128 Units model
+print("LSTM 128 Units Model Architecture")
+model_single_128_units.summary()
+
+# Model architecture of the LSTM 256 Units model
+print("LSTM 256 Units Model Architecture")
+model_single_256_units.summary()
+
+
 # Load the best lstm model
-model_load = mlflow.tensorflow.load_model(model_uri=f"models:/best_lstm_model/5")
+model_load = mlflow.tensorflow.load_model(model_uri=f"models:/best_lstm_model/6")
 
 # Show the prediction of the model based on data windowing test dataset
 print("Predicted normalized output from the normalized test dataset")
@@ -177,4 +193,7 @@ print(predictions_df)
 # Plot the graph for the best model
 print("Predictions for the first three batches on the best model")
 data_window.plot(plot_col=chosen_column,model=model_load)
-# %%
+# %% Show the model architecture for the best model
+print("Best model architecture")
+model_load.summary()
+
