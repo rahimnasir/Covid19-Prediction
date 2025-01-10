@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1736426772504
+current_stage: None
+description: ''
+last_updated_timestamp: 1736426772504
+name: best_lstm_model
+run_id: 0dbf433d138f47f5932ce546298f3cd4
+run_link: ''
+source: file:///c:/Users/Abdul%20Rahim/Desktop/Capstone%20Project/capstone_1/mlruns/581382817259276443/0dbf433d138f47f5932ce546298f3cd4/artifacts/model
+status: READY
+status_message: null
+storage_location: file:///c:/Users/Abdul%20Rahim/Desktop/Capstone%20Project/capstone_1/mlruns/581382817259276443/0dbf433d138f47f5932ce546298f3cd4/artifacts/model
+user_id: null
+version: 5
